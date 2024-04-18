@@ -7,7 +7,9 @@
 {% if matches is not empty %}
     <ul>
         {% for match in matches %}
-            <li>{{ match.homeTeam.name }} vs {{ match.awayTeam.name }} on {{ match.utcDate|date('Y-m-d H:i') }}</li>
+            <li>{{ match.homeTeam.name }} vs {{ match.awayTeam.name }} on {{ match.utcDate|date('Y-m-d H:i') }}
+            - Score: {{ match.score.fullTime.home }}:{{ match.score.fullTime.away }}
+            </li>
         {% endfor %}
     </ul>
 {% else %}
