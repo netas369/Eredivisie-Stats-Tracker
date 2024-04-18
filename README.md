@@ -27,3 +27,4 @@ If you encounter any problems while setting up the development environment, plea
 
 ### 1. ddev ssh and run the command composer install
 ### 2. Run the commands in ddev ssh: composer require symfony/webpack-encore-bundle && npm install bootstrap --save && composer require symfony/http-client
+### 3. Populate database with required entities: php bin/console doctrine:fixtures:load

@@ -23,7 +23,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $username = null;
 
-    #[ORM\ManyToMany(targetEntity: Team::class, cascade: ['persist'])]
+    #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'followers')]
     #[ORM\JoinTable(name: 'user_teams')]
     private Collection $followedTeams;
 

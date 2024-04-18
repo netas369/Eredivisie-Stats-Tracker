@@ -26,6 +26,11 @@
                         <p class="card-text">Some details about the team...</p>
                         <p>{{ team.id }}</p>
                         <a href="{{ path('team_details', {'teamId': team.id}) }}">View Details</a>
+                        {% if team in app.user.followedTeams %}
+                        <a href="{{ path('team_unfollow', {'apiId': team.id}) }}">Unfollow</a>
+                        {% else %}
+                        <a href="{{ path('team_follow', {'apiId': team.id}) }}">Follow</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

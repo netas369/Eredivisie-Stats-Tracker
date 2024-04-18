@@ -8,6 +8,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use App\Entity\Team;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 class TeamController extends AbstractController
 {
@@ -44,20 +47,21 @@ class TeamController extends AbstractController
         ]);
     }
 
-    #[Route('/team/follow/{id}', name: 'team_follow')]
-    public function followTeam(Team $team): Response
+    #[Route('/team/follow/{apiId}', name: 'team_follow')]
+    public function followTeam(int $apiId, EntityManagerInterface $entityManager): Response
     {
-        $user = $this->getUser();
-        if (!$user) {
-            throw new AccessDeniedException('You must be logged in to follow a team.');
+        $team = $entityManager->getRepository(Team::class)->findOneBy(['apiId' => $apiId]);
+
+        if (!$team) {
+            throw $this->createNotFoundException('No team found for api_id ' . $apiId);
         }
 
+        $user = $this->getUser();
         $user->addFollowedTeam($team);
-        $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return $this->redirectToRoute('team_list');
+        return $this->redirectToRoute('app_home'); // Redirect to a route after adding
     }
 
     #[Route('/team/unfollow/{id}', name: 'team_unfollow')]
@@ -73,6 +77,6 @@ class TeamController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return $this->redirectToRoute('team_list');
+        return $this->redirectToRoute('app_home');
     }
 }
