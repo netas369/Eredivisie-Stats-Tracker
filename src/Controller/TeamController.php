@@ -67,18 +67,22 @@ class TeamController extends AbstractController
 
     //need to fix function below
     #[Route('/team/unfollow/{apiId}', name: 'team_unfollow')]
-    public function unfollowTeam(Team $team): Response
-    {
-        $user = $this->getUser();
-        if (!$user) {
-            throw new AccessDeniedException('You must be logged in to unfollow a team.');
-        }
-
-        $user->removeFollowedTeam($team);
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return $this->redirectToRoute('app_home');
+    public function unfollowTeam(int $apiId, EntityManagerInterface $entityManager): Response
+{
+    $team = $entityManager->getRepository(Team::class)->findOneBy(['apiId' => $apiId]);
+    if (!$team) {
+        throw new NotFoundHttpException('No team found for api_id ' . $apiId);
     }
+
+    $user = $this->getUser();
+    if (!$user) {
+        throw new AccessDeniedException('You must be logged in to unfollow a team.');
+    }
+
+    $user->removeFollowedTeam($team);
+    $entityManager->persist($user);
+    $entityManager->flush();
+
+    return $this->redirectToRoute('app_home'); // Redirect to a route after removing
+}
 }
