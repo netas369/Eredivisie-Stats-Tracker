@@ -11,6 +11,17 @@
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
 </style>
 
+{% if followedTeams is not empty %}
+    <h2>Followed Teams:</h2>
+    <ul>
+        {% for team in followedTeams %}
+            <li>{{ team.getName }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You are not following any teams.</p>
+{% endif %}
+
 
 <div class="container mt-4">
     <h1 class="mb-4">Eredivisie Teams</h1>

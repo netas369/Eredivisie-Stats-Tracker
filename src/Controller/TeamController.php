@@ -64,7 +64,9 @@ class TeamController extends AbstractController
         return $this->redirectToRoute('app_home'); // Redirect to a route after adding
     }
 
-    #[Route('/team/unfollow/{id}', name: 'team_unfollow')]
+
+    //need to fix function below
+    #[Route('/team/unfollow/{apiId}', name: 'team_unfollow')]
     public function unfollowTeam(Team $team): Response
     {
         $user = $this->getUser();
