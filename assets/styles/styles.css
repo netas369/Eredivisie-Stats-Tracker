@@ -1,0 +1,14 @@
+@import '~bootstrap/dist/css/bootstrap.css';
+
+/* public/styles.css */
+.teams-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.team {
+    border: 5px solid #ccc;
+    padding: 10px;
+    width: 200px;
+}

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="{{ asset('styles.css') }}">
+{{ encore_entry_link_tags('css/app') }}
 
-<title>Hello HomeController!</title>
+<title>Eredivise Teams</title>
 
 {% block body %}
 <style>
@@ -8,13 +11,25 @@
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
 </style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/var/www/html/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/var/www/html/templates/home/index.html.twig</code></li>
-    </ul>
+<div class="container mt-4">
+    <h1 class="mb-4">Eredivisie Teams</h1>
+    <p class="lead">Here you can find information about Eredivisie teams.</p>
+    <p>If you wish to know more about a team, click on the team name.</p>
+
+    <div class="row">
+        {% for team in teams %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ team.name }}</h5>
+                        <p class="card-text">Some details about the team...</p>
+                        <a href="#" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
+
 {% endblock %}
