@@ -23,3 +23,7 @@ When everything is correctly set up, you will see this homepage at the URL that 
 A basic PHP Symfony project has already been set up in this repository. For more information, read the documentation for the development environment in [DDEV](https://ddev.readthedocs.io/en/stable/) or the PHP framework [Symfony](https://symfony.com/doc/current/index.html).
 
 If you encounter any problems while setting up the development environment, please do not hesitate to contact us!
+
+
+### 1. ddev ssh and run the command composer install
+### 2. Run the commands in ddev ssh: composer require symfony/webpack-encore-bundle && npm install bootstrap --save && composer require symfony/http-client

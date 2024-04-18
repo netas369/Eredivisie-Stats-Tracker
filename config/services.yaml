@@ -6,6 +6,9 @@
 parameters:
 
 services:
+    App\Command\FetchFootballDataCommand:
+        arguments:
+            $footballCache: '@app.football_cache'
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
