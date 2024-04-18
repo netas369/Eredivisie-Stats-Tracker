@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Entity;
 
 use App\Repository\TeamRepository;
@@ -19,7 +21,7 @@ class Team
     #[ORM\Column]
     private ?int $apiId = null;
 
-    #[ORM\ManyToMany(targetEntity=User::class, mappedBy="followedTeams")]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: "followedTeams")]
     private Collection $followers;
 
     public function __construct() {

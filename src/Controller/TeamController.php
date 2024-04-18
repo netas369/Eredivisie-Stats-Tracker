@@ -43,4 +43,36 @@ class TeamController extends AbstractController
             'matches' => $matchesData
         ]);
     }
+
+    #[Route('/team/follow/{id}', name: 'team_follow')]
+    public function followTeam(Team $team): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('You must be logged in to follow a team.');
+        }
+
+        $user->addFollowedTeam($team);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('team_list');
+    }
+
+    #[Route('/team/unfollow/{id}', name: 'team_unfollow')]
+    public function unfollowTeam(Team $team): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('You must be logged in to unfollow a team.');
+        }
+
+        $user->removeFollowedTeam($team);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('team_list');
+    }
 }
