@@ -35,39 +35,61 @@ class FetchFootballDataCommand extends Command
     {
         $this
             ->setDescription('Fetches football data from the API.')
-            ->setHelp('This command allows you to fetch teams data from the Eredivisie league...');
+            ->setHelp('This command allows you to fetch teams data from the Eredivisie league...')
+            ->addArgument('teamId', InputArgument::OPTIONAL, 'The ID of the team to fetch matches for');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln([
-            'Fetching Football Data',
-            '============',
-            '',
-        ]);
+        $io = new SymfonyStyle($input, $output);
+        $teamId = $input->getArgument('teamId');
 
-        $teamsData = $this->cache->get('football_teams', function (ItemInterface $item) {
-            $item->expiresAfter(3600);  // Cache expires after one hour
+        if ($teamId) {
+            $matchesData = $this->fetchAndCacheData(
+                'football_team_matches_' . $teamId,
+                "https://api.football-data.org/v4/teams/{$teamId}/matches/",
+                $io
+            );
+            // Output the matches for the specific team
+            $io->title('Match Details for Team ID: ' . $teamId);
+            foreach ($matchesData['matches'] as $match) {
+                $io->writeln($match['homeTeam']['name'] . ' vs ' . $match['awayTeam']['name'] . ' - ' . $match['utcDate']);
+            }
+        } else {
+            $teamsData = $this->fetchAndCacheData(
+                'football_teams',
+                "https://api.football-data.org/v2/competitions/DED/teams",
+                $io
+            );
+            // Output the list of teams
+            $io->title('Teams in the Eredivisie League:');
+            foreach ($teamsData['teams'] as $team) {
+                $io->writeln($team['name']);
+            }
+        }
 
-            // Fetch the data from the API
+        return Command::SUCCESS;
+    }
+
+    private function fetchAndCacheData(string $cacheKey, string $url, SymfonyStyle $io): array
+    {
+        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($url, $io) {
+            $item->expiresAfter(3600); // Cache expires after one hour
+
+            $io->comment('Fetching data from the API...');
             $response = $this->client->request(
                 'GET',
-                'https://api.football-data.org/v2/competitions/DED/teams',
+                $url,
                 ['headers' => ['X-Auth-Token' => '1828402b90f84baa952ffca2fe9b3b53']]
             );
 
             if ($response->getStatusCode() !== 200) {
-                throw new \RuntimeException('Failed to fetch data from API');
+                $io->error('Failed to fetch data from API: Status code ' . $response->getStatusCode());
+                throw new \RuntimeException('Failed to fetch data from API: Status code ' . $response->getStatusCode());
             }
 
+            $io->success('Data successfully fetched from the API.');
             return $response->toArray();
         });
-
-        // Output cached data or fetched data
-        foreach ($teamsData['teams'] as $team) {
-            $output->writeln($team['name']);
-        }
-
-        return Command::SUCCESS;
     }
 }

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+<title>Hello TeamController!</title>
+
+{% block body %}
+<h1>Match Details</h1>
+{% if matches is not empty %}
+    <ul>
+        {% for match in matches %}
+            <li>{{ match.homeTeam.name }} vs {{ match.awayTeam.name }} on {{ match.utcDate|date('Y-m-d H:i') }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No matches found or data is not available.</p>
+{% endif %}
+{% endblock %}

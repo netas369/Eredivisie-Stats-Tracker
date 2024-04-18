@@ -24,7 +24,8 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ team.name }}</h5>
                         <p class="card-text">Some details about the team...</p>
-                        <a href="#" class="btn btn-primary">View Details</a>
+                        <p>{{ team.id }}</p>
+                        <a href="{{ path('team_details', {'teamId': team.id}) }}">View Details</a>
                     </div>
                 </div>
             </div>
