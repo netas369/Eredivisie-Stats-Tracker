@@ -60,6 +60,7 @@ class TeamController extends AbstractController
         $user->addFollowedTeam($team);
         $entityManager->persist($user);
         $entityManager->flush();
+        $entityManager->refresh($user);
 
         return $this->redirectToRoute('app_home'); // Redirect to a route after adding
     }
