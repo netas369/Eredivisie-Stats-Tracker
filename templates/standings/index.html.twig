@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello StandingsController!{% endblock %}
+
+{% block body %}
+<h1>Eredivisie Standings</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Position</th>
+            <th>Team</th>
+            <th>Points</th>
+            <!-- Add other headings as needed -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in standings.standings %}
+    {% for standing in group.table %}
+        <tr>
+            <td>{{ standing.position }}</td>
+            <td>{{ standing.team.name }}</td>
+            <td>{{ standing.points }}</td>
+        </tr>
+    {% endfor %}
+{% endfor %}
+    </tbody>
+</table>
+{% endblock %}

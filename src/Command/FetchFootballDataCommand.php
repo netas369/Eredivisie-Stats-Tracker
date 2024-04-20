@@ -36,13 +36,22 @@ class FetchFootballDataCommand extends Command
         $this
             ->setDescription('Fetches football data from the API.')
             ->setHelp('This command allows you to fetch teams data from the Eredivisie league...')
-            ->addArgument('teamId', InputArgument::OPTIONAL, 'The ID of the team to fetch matches for');
+            ->addArgument('teamId', InputArgument::OPTIONAL, 'The ID of the team to fetch matches for')
+            ->addOption('standings', null, InputOption::VALUE_NONE, 'Fetch the standings');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $teamId = $input->getArgument('teamId');
+
+        if ($input->getOption('standings')) {
+            $this->fetchAndCacheData(
+                'football_standings',
+                'https://api.football-data.org/v4/competitions/DED/standings',
+                $io
+            );
+        }
 
         if ($teamId) {
             $matchesData = $this->fetchAndCacheData(
