@@ -14,3 +14,5 @@ When everything is correctly set up, you will see this homepage at the URL that 
 ### 1. ddev ssh and run the command composer install
 ### 2. Run the commands in ddev ssh: composer require symfony/webpack-encore-bundle && npm install bootstrap --save && composer require symfony/http-client
 ### 3. Populate database with required entities: php bin/console doctrine:fixtures:load
+### 4. php bin/console app:fetch-football-data in ddev ssh to fetch eredivise teams ( will be made automatically )
+### 5.  php bin/console app:fetch-football-data --standings
