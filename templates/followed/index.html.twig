@@ -1,0 +1,41 @@
+{# templates/followed/index.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}My Followed Teams{% endblock %}
+
+{% block body %}
+<h1>Followed Teams</h1>
+<div class="container">
+    {% if teamMatches is empty %}
+        <p>You are not following any teams.</p>
+    {% else %}
+        {% for teamData in teamMatches %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ teamData.team.name }}</h5>
+                    <p>
+                        <strong>Most Recent Match:</strong>
+                        {% if teamData.recentMatch %}
+                            {{ teamData.recentMatch.homeTeam.name }} vs {{ teamData.recentMatch.awayTeam.name }}
+                            - {{ teamData.recentMatch.score.fullTime.home }}:{{ teamData.recentMatch.score.fullTime.away }}
+                            on {{ teamData.recentMatch.utcDate|date('Y-m-d') }}
+                        {% else %}
+                            No recent matches found.
+                        {% endif %}
+                    </p>
+                    <p>
+                        <strong>Upcoming Match:</strong>
+                        {% if teamData.upcomingMatch %}
+                            {{ teamData.upcomingMatch.homeTeam.name }} vs {{ teamData.upcomingMatch.awayTeam.name }}
+                            on {{ teamData.upcomingMatch.utcDate|date('Y-m-d') }}
+                        {% else %}
+                            No upcoming matches scheduled.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

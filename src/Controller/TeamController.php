@@ -12,15 +12,22 @@ use App\Entity\Team;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+
 
 class TeamController extends AbstractController
 {
     private HttpClientInterface $httpClient;
+    private CacheInterface $cache;
+    private TokenStorageInterface $tokenStorage;
 
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, CacheInterface $cache, TokenStorageInterface $tokenStorage)
     {
         $this->httpClient = $httpClient;
+        $this->cache = $cache;
+        $this->tokenStorage = $tokenStorage;
+        
     }
 
     #[Route('/team/{teamId}', name: 'team_details')]
@@ -89,10 +96,51 @@ class TeamController extends AbstractController
 }
 
 
-#[Route('/followed', name: 'followed_list')]
-public function listTeams()
-{
-    return $this->redirectToRoute('app_home'); // Redirect to a route after removing
-}
+    #[Route('/followed', name: 'followed_list')]
+    public function listTeams()
+    {$token = $this->tokenStorage->getToken();
+        if (!$token) {
+            return $this->redirectToRoute('app_login');
+        }
+        
+        $user = $token->getUser();
+        if (!is_object($user)) {
+            throw new UnsupportedUserException('Expected an object type user.');
+        }
+
+        $followedTeams = $user->getFollowedTeams();
+        $teamData = [];
+
+        foreach ($followedTeams as $team) {
+            $teamData[$team->getId()] = [
+                'team' => $team,
+                'recentMatch' => $this->fetchTeamMatchData($team->getApiId(), 'recent'),
+                'upcomingMatch' => $this->fetchTeamMatchData($team->getApiId(), 'upcoming')
+            ];
+        }
+
+        return $this->render('followed/index.html.twig', [
+            'teamMatches' => $teamData
+        ]);
+    }
+
+    private function fetchTeamMatchData(int $teamId, string $matchType): ?array
+    {
+        $cacheKey = "team_{$teamId}_{$matchType}_match";
+        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($teamId, $matchType) {
+            $url = "https://api.football-data.org/v4/teams/{$teamId}/matches?status=" . 
+                   ($matchType === 'recent' ? 'FINISHED' : 'SCHEDULED') . "&limit=1";
+            $response = $this->httpClient->request('GET', $url, [
+                'headers' => ['X-Auth-Token' => '1828402b90f84baa952ffca2fe9b3b53']
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $data = $response->toArray();
+                return $data['matches'][0] ?? null;
+            }
+
+            return null;
+        });
+    }
 
 }

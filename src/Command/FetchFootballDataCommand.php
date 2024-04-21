@@ -12,6 +12,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use App\Entity\Team;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[AsCommand(
     name: 'app:fetch-football-data',
@@ -20,14 +22,15 @@ use Symfony\Contracts\Cache\ItemInterface;
 class FetchFootballDataCommand extends Command
 {
     protected static $defaultName = 'app:fetch-football-data';
-
     private $client;
     private $cache;
+    private $entityManager;
 
-    public function __construct(HttpClientInterface $client, CacheInterface $footballCache)
+    public function __construct(HttpClientInterface $client, CacheInterface $footballCache, EntityManagerInterface $entityManager)
     {
         $this->client = $client;
         $this->cache = $footballCache;
+        $this->entityManager = $entityManager;
         parent::__construct();
     }
 
@@ -37,7 +40,8 @@ class FetchFootballDataCommand extends Command
             ->setDescription('Fetches football data from the API.')
             ->setHelp('This command allows you to fetch teams data from the Eredivisie league...')
             ->addArgument('teamId', InputArgument::OPTIONAL, 'The ID of the team to fetch matches for')
-            ->addOption('standings', null, InputOption::VALUE_NONE, 'Fetch the standings');
+            ->addOption('standings', null, InputOption::VALUE_NONE, 'Fetch the standings')
+            ->addOption('all-matches', null, InputOption::VALUE_NONE, 'Fetch recent and upcoming matches for all teams');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -51,6 +55,14 @@ class FetchFootballDataCommand extends Command
                 'https://api.football-data.org/v4/competitions/DED/standings',
                 $io
             );
+        }
+
+        if ($input->getOption('all-matches')) {
+            $teamIds = $this->getAllTeamIds(); // Implement this method to retrieve all team IDs
+            foreach ($teamIds as $id) {
+                $this->fetchMatchData($id, 'recent', $io);
+                $this->fetchMatchData($id, 'upcoming', $io);
+            }
         }
 
         if ($teamId) {
@@ -80,6 +92,22 @@ class FetchFootballDataCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function fetchMatchData(int $teamId, string $type, SymfonyStyle $io)
+{
+    $url = "https://api.football-data.org/v4/teams/{$teamId}/matches";
+    switch ($type) {
+        case 'recent':
+            $url .= "?status=FINISHED&limit=1";
+            break;
+        case 'upcoming':
+            $url .= "?status=SCHEDULED&limit=1";
+            break;
+    }
+
+    // Use the passed $io instance, do not create a new SymfonyStyle
+    return $this->fetchAndCacheData("team_{$teamId}_{$type}_match", $url, $io);
+}
+
     private function fetchAndCacheData(string $cacheKey, string $url, SymfonyStyle $io): array
     {
         return $this->cache->get($cacheKey, function (ItemInterface $item) use ($url, $io) {
@@ -101,4 +129,13 @@ class FetchFootballDataCommand extends Command
             return $response->toArray();
         });
     }
+
+    private function getAllTeamIds()
+{
+    $teamRepository = $this->entityManager->getRepository(Team::class);
+    $teams = $teamRepository->findAll();
+    return array_map(function ($team) {
+        return $team->getId();
+    }, $teams);
+}
 }
