@@ -53,4 +53,23 @@ class Team
     public function getFollowers(): Collection {
         return $this->followers;
     }
+
+    public function addFollower(User $user): self
+    {
+        if (!$this->followers->contains($user)) {
+            $this->followers[] = $user;
+            $user->addFollowedTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFollower(User $user): self
+    {
+        if ($this->followers->removeElement($user)) {
+            $user->removeFollowedTeam($this);
+        }
+
+        return $this;
+    }
 }

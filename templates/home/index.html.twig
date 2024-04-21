@@ -1,49 +1,73 @@
 {% extends 'base.html.twig' %}
 
-
-{% block title %}Eredivisie teams{% endblock %}
+{% block title %}Eredivisie Teams{% endblock %}
 
 {% block body %}
-
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-{% if followedTeams is not empty %}
-    <h2>Followed Teams:</h2>
-    <ul>
-        {% for team in followedTeams %}
-            <li>{{ team.getName }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>You are not following any teams.</p>
-{% endif %}
-
-
-<div class="container mt-4">
-    <h1 class="mb-4">Eredivisie Teams</h1>
-    <p class="lead">Here you can find information about Eredivisie teams.</p>
-    <p>If you wish to know more about a team, click on the team name.</p>
+<div class="container mt-5">
+    {% if app.user %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1>Followed Teams</h1>
+                {% if app.user.followedTeams is not empty %}
+                    <div id="followedTeamsCarousel" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner">
+                            {% set batch_size = 5 %}
+                            {% for batch in app.user.followedTeams|batch(batch_size) %}
+                                <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                                    <div class="d-flex">
+                                        {% for team in batch %}
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ team.name }}</h5>
+                                                    <a href="{{ path('team_details', {'teamId': team.apiId}) }}" class="btn btn-primary">View Details</a>
+                                                    <a href="{{ path('team_unfollow', {'apiId': team.apiId}) }}" class="btn btn-danger">Unfollow</a>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <a class="carousel-control-prev" href="#followedTeamsCarousel" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#followedTeamsCarousel" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                {% else %}
+                    <p>You are not following any teams.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 
     <div class="row">
-        {% for team in teams %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ team.name }}</h5>
-                        <p class="card-text">Some details about the team...</p>
-                        <p>{{ team.id }}</p>
-                        <a href="{{ path('team_details', {'teamId': team.id}) }}">View Details</a>
-                        <a href="{{ path('team_unfollow', {'apiId': team.id}) }}">Unfollow</a>
-                        <a href="{{ path('team_follow', {'apiId': team.id}) }}">Follow</a>
+        <div class="col-12">
+            <h2 class="mb-4">Eredivisie Teams</h2>
+            <div class="card-deck">
+                {% for team in teams %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ team.name }}</h5>
+                                <p class="card-text">Some details about the team...</p>
+                                <a href="{{ path('team_details', {'teamId': team.id}) }}" class="btn btn-secondary">View Details</a>
+                                {% if app.user %}
+                                    {% if team in app.user.followedTeams %}
+                                        <a href="{{ path('team_unfollow', {'apiId': team.id}) }}" class="btn btn-warning">Unfollow</a>
+                                    {% else %}
+                                        <a href="{{ path('team_follow', {'apiId': team.id}) }}" class="btn btn-success">Follow</a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-        {{ dump(followedTeams) }}
+        </div>
     </div>
 </div>
-
 {% endblock %}

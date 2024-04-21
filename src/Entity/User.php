@@ -84,17 +84,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->followedTeams;
     }
 
-    public function addFollowedTeam(Team $team): self {
+    public function addFollowedTeam(Team $team): self
+    {
         if (!$this->followedTeams->contains($team)) {
             $this->followedTeams[] = $team;
+            $team->addFollower($this);
         }
+
         return $this;
     }
 
-    public function removeFollowedTeam(Team $team): self {
-        if ($this->followedTeams->contains($team)) {
-            $this->followedTeams->removeElement($team);
+    public function removeFollowedTeam(Team $team): self
+    {
+        if ($this->followedTeams->removeElement($team)) {
+            $team->removeFollower($this);
         }
+
         return $this;
     }
 }
