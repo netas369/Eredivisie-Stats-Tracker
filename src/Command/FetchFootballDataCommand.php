@@ -111,7 +111,7 @@ class FetchFootballDataCommand extends Command
     private function fetchAndCacheData(string $cacheKey, string $url, SymfonyStyle $io): array
     {
         return $this->cache->get($cacheKey, function (ItemInterface $item) use ($url, $io) {
-            $item->expiresAfter(36000); 
+            $item->expiresAfter(86400);
 
             $io->comment('Fetching data from the API...');
             $response = $this->client->request(
