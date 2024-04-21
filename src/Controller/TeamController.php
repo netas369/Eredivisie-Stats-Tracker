@@ -14,19 +14,21 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-
+use Psr\Log\LoggerInterface;
 
 class TeamController extends AbstractController
 {
     private HttpClientInterface $httpClient;
     private CacheInterface $cache;
     private TokenStorageInterface $tokenStorage;
+    private $logger;
 
-    public function __construct(HttpClientInterface $httpClient, CacheInterface $cache, TokenStorageInterface $tokenStorage)
+    public function __construct(HttpClientInterface $httpClient, CacheInterface $cache, TokenStorageInterface $tokenStorage, LoggerInterface $logger)
     {
         $this->httpClient = $httpClient;
         $this->cache = $cache;
         $this->tokenStorage = $tokenStorage;
+        $this->logger = $logger;
         
     }
 
@@ -96,51 +98,78 @@ class TeamController extends AbstractController
 }
 
 
-    #[Route('/followed', name: 'followed_list')]
-    public function listTeams()
-    {$token = $this->tokenStorage->getToken();
-        if (!$token) {
-            return $this->redirectToRoute('app_login');
-        }
-        
-        $user = $token->getUser();
-        if (!is_object($user)) {
-            throw new UnsupportedUserException('Expected an object type user.');
-        }
-
-        $followedTeams = $user->getFollowedTeams();
-        $teamData = [];
-
-        foreach ($followedTeams as $team) {
-            $teamData[$team->getId()] = [
-                'team' => $team,
-                'recentMatch' => $this->fetchTeamMatchData($team->getApiId(), 'recent'),
-                'upcomingMatch' => $this->fetchTeamMatchData($team->getApiId(), 'upcoming')
-            ];
-        }
-
-        return $this->render('followed/index.html.twig', [
-            'teamMatches' => $teamData
-        ]);
+#[Route('/followed', name: 'followed_teams')]
+public function listTeams(): Response
+{
+    $user = $this->getUser();
+    if (!$user) {
+        return $this->redirectToRoute('app_login');
     }
 
-    private function fetchTeamMatchData(int $teamId, string $matchType): ?array
-    {
-        $cacheKey = "team_{$teamId}_{$matchType}_match";
-        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($teamId, $matchType) {
-            $url = "https://api.football-data.org/v4/teams/{$teamId}/matches?status=" . 
-                   ($matchType === 'recent' ? 'FINISHED' : 'SCHEDULED') . "&limit=1";
-            $response = $this->httpClient->request('GET', $url, [
-                'headers' => ['X-Auth-Token' => '1828402b90f84baa952ffca2fe9b3b53']
-            ]);
+    $followedTeams = $user->getFollowedTeams();
+    $teamMatches = [];
 
-            if ($response->getStatusCode() === 200) {
-                $data = $response->toArray();
-                return $data['matches'][0] ?? null;
-            }
-
-            return null;
-        });
+    foreach ($followedTeams as $team) {
+        $matches = $this->fetchTeamMatches($team->getApiId()); // Fetch all matches for the team
+        $upcomingMatch = $this->getUpcomingMatch($matches); // Get the next upcoming match within a week
+        $recentMatch = $this->getMostRecentMatch($matches); // Get the most recent match
+    
+        $teamMatches[] = [
+            'team' => $team,
+            'recentMatch' => $recentMatch,
+            'upcomingMatch' => $upcomingMatch
+        ];
     }
 
+    return $this->render('followed/index.html.twig', [
+        'teamMatches' => $teamMatches
+    ]);
+}
+
+private function fetchTeamMatches(int $teamId): array
+{
+    $url = "https://api.football-data.org/v4/teams/{$teamId}/matches";
+    $response = $this->httpClient->request('GET', $url, [
+        'headers' => ['X-Auth-Token' => '1828402b90f84baa952ffca2fe9b3b53']
+    ]);
+
+    if ($response->getStatusCode() === 200) {
+        return $response->toArray()['matches'];
+    }
+
+    return [];
+}
+
+private function getMostRecentMatch(array $matches): ?array
+{
+    // Filter out matches that are finished and sort them by date descending
+    $filteredMatches = array_filter($matches, function ($match) {
+        return new \DateTime($match['utcDate']) < new \DateTime() && $match['status'] === 'FINISHED';
+    });
+
+    usort($filteredMatches, function ($a, $b) {
+        return new \DateTime($b['utcDate']) <=> new \DateTime($a['utcDate']);
+    });
+
+    // Return the first match which will be the most recent past match
+    return $filteredMatches[0] ?? null;
+}
+
+private function getUpcomingMatch(array $matches): ?array
+{
+    $now = new \DateTime();
+    $oneWeekLater = new \DateTime('+7 days');
+
+    $filteredMatches = array_filter($matches, function ($match) use ($now, $oneWeekLater) {
+        $matchDate = new \DateTime($match['utcDate']);
+        return $matchDate > $now && $matchDate <= $oneWeekLater;
+    });
+
+    usort($filteredMatches, function ($a, $b) {
+        return new \DateTime($a['utcDate']) <=> new \DateTime($b['utcDate']);
+    });
+
+    // Return the first upcoming match that is within the next week
+    return $filteredMatches[0] ?? null;
+}
 }
