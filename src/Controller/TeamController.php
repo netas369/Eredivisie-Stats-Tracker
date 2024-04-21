@@ -66,7 +66,6 @@ class TeamController extends AbstractController
     }
 
 
-    //need to fix function below
     #[Route('/team/unfollow/{apiId}', name: 'team_unfollow')]
     public function unfollowTeam(int $apiId, EntityManagerInterface $entityManager): Response
 {
@@ -86,4 +85,12 @@ class TeamController extends AbstractController
 
     return $this->redirectToRoute('app_home'); // Redirect to a route after removing
 }
+
+
+#[Route('/teamlist', name: 'team_list')]
+public function listTeams()
+{
+    return $this->redirectToRoute('app_home'); // Redirect to a route after removing
+}
+
 }
