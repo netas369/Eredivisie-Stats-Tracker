@@ -5,14 +5,26 @@
 {% block title %}Followed Teams{% endblock %}
 
 {% block body %}
-    <h1>Followed Teams</h1>
-    {% for teamMatch in teamMatches %}
-    <div>
-        <h2>{{ teamMatch.team.name }}</h2>
-        <p>Last Match: {% if teamMatch.recentMatch %}{{ teamMatch.recentMatch.homeTeam.name }} vs {{ teamMatch.recentMatch.awayTeam.name }} - Score: {{ teamMatch.recentMatch.score.fullTime.home }}:{{ teamMatch.recentMatch.score.fullTime.away }}{% else %}No recent matches found.{% endif %}</p>
-        <p>Upcoming Match: {% if teamMatch.upcomingMatch %}{{ teamMatch.upcomingMatch.homeTeam.name }} vs {{ teamMatch.upcomingMatch.awayTeam.name }} - Date: {{ teamMatch.upcomingMatch.utcDate|date('Y-m-d H:i') }}{% else %}No upcoming matches scheduled.{% endif %}</p>
+<div class="container">
+    <h1 class="my-4 text-center">Followed Teams</h1>
+    <div class="row">
+        {% for teamMatch in teamMatches %}
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title">{{ teamMatch.team.name }}</h2>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-text"><strong>Last Match:</strong> {% if teamMatch.recentMatch %}{{ teamMatch.recentMatch.homeTeam.name }} vs {{ teamMatch.recentMatch.awayTeam.name }} - Score: {{ teamMatch.recentMatch.score.fullTime.home }}:{{ teamMatch.recentMatch.score.fullTime.away }}{% else %}No recent matches found.{% endif %}</h5>
+                    <h5 class="card-text"><strong>Upcoming Match:</strong> {% if teamMatch.upcomingMatch %}{{ teamMatch.upcomingMatch.homeTeam.name }} vs {{ teamMatch.upcomingMatch.awayTeam.name }} - Date: {{ teamMatch.upcomingMatch.utcDate|date('Y-m-d H:i') }}{% else %}No upcoming matches scheduled.{% endif %}</h5>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <p>You are not following any teams.</p>
+        </div>
+        {% endfor %}
     </div>
-{% else %}
-    <p>You are not following any teams.</p>
-{% endfor %}
+</div>
 {% endblock %}

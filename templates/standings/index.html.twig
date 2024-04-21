@@ -3,27 +3,28 @@
 {% block title %}Hello StandingsController!{% endblock %}
 
 {% block body %}
-<h1>Eredivisie Standings</h1>
+<div class="container">
+    <h1 class="my-4 text-center">Eredivisie Standings</h1>
 
-<table>
-    <thead>
-        <tr>
-            <th>Position</th>
-            <th>Team</th>
-            <th>Points</th>
-            <!-- Add other headings as needed -->
-        </tr>
-    </thead>
-    <tbody>
-        {% for group in standings.standings %}
-    {% for standing in group.table %}
-        <tr>
-            <td>{{ standing.position }}</td>
-            <td>{{ standing.team.name }}</td>
-            <td>{{ standing.points }}</td>
-        </tr>
-    {% endfor %}
-{% endfor %}
-    </tbody>
-</table>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" class="h4">Position</th>
+                <th scope="col" class="h4">Team</th>
+                <th scope="col" class="h4">Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in standings.standings %}
+                {% for standing in group.table %}
+                    <tr>
+                        <td class="h5">{{ standing.position }}</td>
+                        <td class="h5">{{ standing.team.name }}</td>
+                        <td class="h5">{{ standing.points }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
