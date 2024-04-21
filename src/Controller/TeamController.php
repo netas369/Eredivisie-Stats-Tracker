@@ -10,7 +10,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use App\Entity\Team;
 use Doctrine\ORM\EntityManagerInterface;
-
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class TeamController extends AbstractController
 {

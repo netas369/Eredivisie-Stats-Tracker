@@ -9,18 +9,25 @@ use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Team;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class HomeController extends AbstractController
 {
     private $cache;
 
     private $security;
+    private $authorizationChecker;
 
-    public function __construct(CacheInterface $footballCache, TokenStorageInterface $tokenStorage)
+    public function __construct(CacheInterface $footballCache, TokenStorageInterface $tokenStorage, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->cache = $footballCache;
 
         $this->security = $tokenStorage;
+
+        $this->authorizationChecker = $authorizationChecker;
+        
+
     }
 
     #[Route('/', name: 'app_home')]
@@ -30,12 +37,18 @@ class HomeController extends AbstractController
             throw new \Exception("No data available in cache");
         });
 
-        $user = $this->security->getToken()->getUser();
-
-        if ($user instanceof User) {
-        $followedTeams = $user->getFollowedTeams();
-        } else {
         $followedTeams = [];
+
+         // Only attempt to get the user if one is logged in
+         try {
+            if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+                $user = $this->security->getToken()->getUser();
+                if ($user instanceof User) {
+                    $followedTeams = $user->getFollowedTeams();
+                }
+            }
+        } catch (AuthenticationException $exception) {
+            // Handle the case where the user is not authenticated if necessary
         }
 
         // Fetching data to get followed teams below
