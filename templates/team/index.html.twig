@@ -1,18 +1,39 @@
-<!DOCTYPE html>
+{% extends 'base.html.twig' %}
 
-<title>Hello TeamController!</title>
+{% block title %}Team matches of the season{% endblock %}
 
 {% block body %}
-<h1>Match Details</h1>
-{% if matches is not empty %}
-    <ul>
-        {% for match in matches %}
-            <li>{{ match.homeTeam.name }} vs {{ match.awayTeam.name }} on {{ match.utcDate|date('Y-m-d H:i') }}
-            - Score: {{ match.score.fullTime.home }}:{{ match.score.fullTime.away }}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No matches found or data is not available.</p>
-{% endif %}
+<div class="container">
+    <h1 class="my-4">Match Details</h1>
+    {% if matches is not empty %}
+        {% set reversedMatches = matches|reverse %}
+        {% set pages = reversedMatches|batch(10) %}
+        {% set currentPage = app.request.query.get('page', 1) %}
+        {% set currentMatches = pages[currentPage - 1] %}
+        <div class="list-group">
+            {% for match in currentMatches %}
+                <div class="list-group-item">
+                    <h5 class="mb-1">{{ match.homeTeam.name }} vs {{ match.awayTeam.name }}</h5>
+                    <p class="mb-1">Date: {{ match.utcDate|date('Y-m-d H:i') }}</p>
+                    {% if match.score.fullTime.home is null and match.score.fullTime.away is null %}
+                        <p class="mb-1">Status: Scheduled</p>
+                        {% else %}
+                    <p class="mb-1">Score: {{ match.score.fullTime.home }}:{{ match.score.fullTime.away }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <nav aria-label="Page navigation example" class="my-4">
+            <ul class="pagination">
+                {% for i in 1..pages|length %}
+                    <li class="page-item{% if i == currentPage %} active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    {% else %}
+        <p>No matches found or data is not available.</p>
+    {% endif %}
+</div>
 {% endblock %}
