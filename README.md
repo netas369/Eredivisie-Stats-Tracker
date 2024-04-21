@@ -16,3 +16,4 @@ When everything is correctly set up, you will see this homepage at the URL that 
 ### 3. Populate database with required entities: php bin/console doctrine:fixtures:load
 ### 4. php bin/console app:fetch-football-data in ddev ssh to fetch eredivise teams ( will be made automatically )
 ### 5.  php bin/console app:fetch-football-data --standings
+### 6. run ddev fetch-football-data it will runn all the commands.

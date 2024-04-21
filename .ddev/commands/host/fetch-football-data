@@ -1,0 +1,3 @@
+ddev exec php bin/console doctrine:fixtures:load
+ddev exec php bin/console app:fetch-football-data
+ddev exec php bin/console app:fetch-football-data --standings
