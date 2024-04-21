@@ -89,7 +89,7 @@ class TeamController extends AbstractController
 }
 
 
-#[Route('/teamlist', name: 'team_list')]
+#[Route('/followed', name: 'followed_list')]
 public function listTeams()
 {
     return $this->redirectToRoute('app_home'); // Redirect to a route after removing
