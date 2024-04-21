@@ -99,77 +99,78 @@ class TeamController extends AbstractController
 
 
 #[Route('/followed', name: 'followed_teams')]
-public function listTeams(): Response
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->redirectToRoute('app_login');
+    public function listTeams(): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $followedTeams = $user->getFollowedTeams();
+        $teamMatches = [];
+
+        foreach ($followedTeams as $team) {
+            $matches = $this->fetchTeamMatches($team->getApiId()); // Fetch all matches for the team
+            $upcomingMatch = $this->getUpcomingMatch($matches); // Get the next upcoming match within a week
+            $recentMatch = $this->getMostRecentMatch($matches); // Get the most recent match
+        
+            $teamMatches[] = [
+                'team' => $team,
+                'recentMatch' => $recentMatch,
+                'upcomingMatch' => $upcomingMatch
+            ];
+        }
+
+        return $this->render('followed/index.html.twig', [
+            'teamMatches' => $teamMatches
+        ]);
     }
 
-    $followedTeams = $user->getFollowedTeams();
-    $teamMatches = [];
+    private function fetchTeamMatches(int $teamId): array
+    {
+        $cacheKey = 'team_matches_' . $teamId;
+        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($teamId) {
+            $item->expiresAfter(3600); // Cache for 1 hour
+            $url = "https://api.football-data.org/v4/teams/{$teamId}/matches";
+            $response = $this->httpClient->request('GET', $url, [
+                'headers' => ['X-Auth-Token' => '1828402b90f84baa952ffca2fe9b3b53']
+            ]);
 
-    foreach ($followedTeams as $team) {
-        $matches = $this->fetchTeamMatches($team->getApiId()); // Fetch all matches for the team
-        $upcomingMatch = $this->getUpcomingMatch($matches); // Get the next upcoming match within a week
-        $recentMatch = $this->getMostRecentMatch($matches); // Get the most recent match
-    
-        $teamMatches[] = [
-            'team' => $team,
-            'recentMatch' => $recentMatch,
-            'upcomingMatch' => $upcomingMatch
-        ];
+            if ($response->getStatusCode() === 200) {
+                return $response->toArray()['matches'];
+            }
+
+            return [];
+        });
     }
 
-    return $this->render('followed/index.html.twig', [
-        'teamMatches' => $teamMatches
-    ]);
-}
+    private function getMostRecentMatch(array $matches): ?array
+    {
+        $filteredMatches = array_filter($matches, function ($match) {
+            return new \DateTime($match['utcDate']) < new \DateTime() && $match['status'] === 'FINISHED';
+        });
 
-private function fetchTeamMatches(int $teamId): array
-{
-    $url = "https://api.football-data.org/v4/teams/{$teamId}/matches";
-    $response = $this->httpClient->request('GET', $url, [
-        'headers' => ['X-Auth-Token' => '1828402b90f84baa952ffca2fe9b3b53']
-    ]);
+        usort($filteredMatches, function ($a, $b) {
+            return new \DateTime($b['utcDate']) <=> new \DateTime($a['utcDate']);
+        });
 
-    if ($response->getStatusCode() === 200) {
-        return $response->toArray()['matches'];
+        return $filteredMatches[0] ?? null;
     }
 
-    return [];
-}
+    private function getUpcomingMatch(array $matches): ?array
+    {
+        $now = new \DateTime();
+        $oneWeekLater = new \DateTime('+7 days');
 
-private function getMostRecentMatch(array $matches): ?array
-{
-    // Filter out matches that are finished and sort them by date descending
-    $filteredMatches = array_filter($matches, function ($match) {
-        return new \DateTime($match['utcDate']) < new \DateTime() && $match['status'] === 'FINISHED';
-    });
+        $filteredMatches = array_filter($matches, function ($match) use ($now, $oneWeekLater) {
+            $matchDate = new \DateTime($match['utcDate']);
+            return $matchDate > $now && $matchDate <= $oneWeekLater;
+        });
 
-    usort($filteredMatches, function ($a, $b) {
-        return new \DateTime($b['utcDate']) <=> new \DateTime($a['utcDate']);
-    });
+        usort($filteredMatches, function ($a, $b) {
+            return new \DateTime($a['utcDate']) <=> new \DateTime($b['utcDate']);
+        });
 
-    // Return the first match which will be the most recent past match
-    return $filteredMatches[0] ?? null;
-}
-
-private function getUpcomingMatch(array $matches): ?array
-{
-    $now = new \DateTime();
-    $oneWeekLater = new \DateTime('+7 days');
-
-    $filteredMatches = array_filter($matches, function ($match) use ($now, $oneWeekLater) {
-        $matchDate = new \DateTime($match['utcDate']);
-        return $matchDate > $now && $matchDate <= $oneWeekLater;
-    });
-
-    usort($filteredMatches, function ($a, $b) {
-        return new \DateTime($a['utcDate']) <=> new \DateTime($b['utcDate']);
-    });
-
-    // Return the first upcoming match that is within the next week
-    return $filteredMatches[0] ?? null;
-}
+        return $filteredMatches[0] ?? null;
+    }
 }
