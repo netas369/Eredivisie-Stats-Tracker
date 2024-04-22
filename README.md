@@ -2,6 +2,7 @@
 
 ## To get the project running:
 
+#### 0. This environment is set up with DDEV. Install this software if not installed yet.
 #### 1. git clone https://github.com/netas369/Eredivisie-Stats-Tracker
 #### 2. Open terminal and start the development environment by writing command 'ddev start'
 #### 3. Open development terminal by writing command 'ddev ssh'
