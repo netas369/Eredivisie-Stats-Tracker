@@ -28,7 +28,7 @@
 ### '/register' Register Page
 #### Register page used to register new user
 
-#### '/logout' Log Out URL
+### '/logout' Log Out URL
 #### Log Out URL can be accesed by registered users, it can be found on navigation bar named Logout.
 
 ## Bugs in the system to be fixed
