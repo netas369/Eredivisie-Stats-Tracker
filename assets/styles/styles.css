@@ -1,0 +1,48 @@
+@import '~bootstrap/dist/css/bootstrap.css';
+
+body {
+    background-color: rgb(245, 255, 244);
+}
+
+/* public/styles.css */
+.teams-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.team {
+    border: 5px solid #ccc;
+    padding: 10px;
+    width: 200px;
+}
+
+
+
+.carousel-item .card {
+    flex: 0 0 20%; /* Adjusts the width for 5 cards in a row */
+    margin: 0 10px; /* Spacing between cards */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: black; /* Change the color of arrows */
+    color:black;
+
+}
+
+.carousel-control-prev, .carousel-control-next {
+    filter: invert(100%); /* Makes arrows more visible if needed */
+}
+
+/* Positioning the left arrow */
+.carousel-control-prev {
+    left: -50px;  
+    width: 50px; 
+}
+
+/* Positioning the right arrow */
+.carousel-control-next {
+    right: -50px; 
+    width: 50px; 
+}

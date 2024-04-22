@@ -1,14 +1,6 @@
-# Internship assignment template
-This is the template that can be used to create the internship assignment. It is based on a DDEV environment and the use of the Symfony framework.
 
 ## Usage
-This is a template for the application development for the internship assignment. This environment is set up with [DDEV]([https://ddev.readthedocs.io/en/stable/](https://ddev.com/get-started/)). Install this software to make use of this development environment.
-
-Create a new personal repository based on this template
-
-![Screenshot 2024-04-09 at 10 34 28](https://github.com/recranet/internship-assignment-template/assets/36085765/90d8b4a0-8d2e-43c2-8677-3158270ee716)
-
-Once you have cloned this repository on your computer, you can use the following commands:
+This environment is set up with [DDEV]([https://ddev.readthedocs.io/en/stable/](https://ddev.com/get-started/)). Install this software to make use of this development environment.
 
 `ddev start` This command starts the local development environment.
 
@@ -18,8 +10,10 @@ To develop in the application, you can use the `ddev ssh` command. This opens a 
 
 When everything is correctly set up, you will see this homepage at the URL that appears in your terminal after you have used `ddev start`.
 
-   ![Screenshot 2024-04-09 at 10 43 57](https://github.com/recranet/internship-assignment-template/assets/36085765/1973e08f-af3e-4999-925f-5dc1c9546b78)
 
-A basic PHP Symfony project has already been set up in this repository. For more information, read the documentation for the development environment in [DDEV](https://ddev.readthedocs.io/en/stable/) or the PHP framework [Symfony](https://symfony.com/doc/current/index.html).
-
-If you encounter any problems while setting up the development environment, please do not hesitate to contact us!
+### 1. ddev ssh and run the command composer install
+### 2. Run the commands in ddev ssh: composer require symfony/webpack-encore-bundle && npm install bootstrap --save && composer require symfony/http-client
+### 3. Populate database with required entities: php bin/console doctrine:fixtures:load
+### 4. php bin/console app:fetch-football-data in ddev ssh to fetch eredivise teams ( will be made automatically )
+### 5.  php bin/console app:fetch-football-data --standings
+### 6. run ddev fetch-football-data it will runn all the commands.

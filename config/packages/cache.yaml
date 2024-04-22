@@ -1,5 +1,10 @@
 framework:
     cache:
+        pools:
+            app.football_cache:
+                adapter: cache.adapter.filesystem
+                public: true
+        # The pool key is used to retrieve the cache pool by its name or alias
         # Unique name of your app: used to compute stable namespaces for cache keys.
         #prefix_seed: your_vendor_name/app_name
 
