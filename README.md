@@ -2,11 +2,11 @@
 
 ## To get the project running:
 
-### 1. git clone https://github.com/netas369/Eredivisie-Stats-Tracker
-### 2. Open terminal and start the development environment by writing command 'ddev start'
-### 3. Open development terminal by writing command 'ddev ssh'
-### 4. In development terminal write command 'composer install'
-### 5. In normal terminal session write command 'ddev fetch-football-data'. It will run all the required commands for fetching data and populating the database with required entitities.
+#### 1. git clone https://github.com/netas369/Eredivisie-Stats-Tracker
+#### 2. Open terminal and start the development environment by writing command 'ddev start'
+#### 3. Open development terminal by writing command 'ddev ssh'
+#### 4. In development terminal write command 'composer install'
+#### 5. In normal terminal session write command 'ddev fetch-football-data'. It will run all the required commands for fetching data and populating the database with required entitities.
 
 
 ## Application Explained
